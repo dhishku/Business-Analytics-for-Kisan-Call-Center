@@ -10,16 +10,8 @@ These are just some of the use cases, the possibilities are infinite.
 ## Project Structure
 
 1. The project uses mysql data to store the database. The schema of the KCCDATA table in MYSQL testDB database is as given below.
-`
-+------------+--------------+------+-----+---------+----------------+
-| Field      | Type         | Null | Key | Default | Extra          |
-+------------+--------------+------+-----+---------+----------------+
-| call_id    | int(11)      | NO   | PRI | NULL    | auto_increment |
-| location   | varchar(25)  | NO   |     | NULL    |                |
-| crop       | varchar(100) | YES  |     | NULL    |                |
-| annotation | varchar(100) | YES  |     | NULL    |                |
-| date       | date         | YES  |     | NULL    |                |
-+------------+--------------+------+-----+---------+----------------+`
+
+![sql schema](res/mysql.png)`
 
 2. The project uses a RESTFUL API structure and is run on Tomcat v7 server. 
 3. To run the project, clone the repository, open in eclipse as a gradle project. Run the task "gradle eclipseWTP" to build the WAR file. Then Run as --> 1. Run on Server... Select the Tomcat v7 server.
