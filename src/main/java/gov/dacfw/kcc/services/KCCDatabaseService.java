@@ -329,7 +329,7 @@ public class KCCDatabaseService {
 	 * If year is wrapped, then the call falling in the alertwindow but of previous year is 
 	 * counted in the present year.
 	 * */
-	public List<CallSummaryData> getCallsSummary(String location, String crop, String annotation,
+	public List<CallSummaryData> getCallsSummary(List<String> location, List<String> crop, List<String> annotation,
 			int beginDayOfYear, int endDayOfYear, int alertWindowLength){
 		// Initializing variables
 		String sql = "";
@@ -348,27 +348,67 @@ public class KCCDatabaseService {
 		if  (beginDayOfYear < endDayOfYear){
 			// There is no wrapping around the calendar year.
 			sql = "SELECT location, crop, annotation, year(date), count(call_id) FROM KCCDATA WHERE ";
-			if (location != null)
-				sql = sql + "location LIKE '" + location + "%' AND ";
-			if (crop != null)
-				sql = sql + "crop LIKE '" + crop + "%' AND ";
-			if (annotation != null)
-				sql = sql + "annotation LIKE'" + annotation + "%' AND ";
-			
-			sql = sql + "dayofyear(date) BETWEEN "+beginDayOfYear+" AND "+endDayOfYear+" GROUP BY 1,2,3,4 order by 1 ASC, 2 ASC, 3 ASC, 4 DESC;";
+			if (location != null){
+				for (int i = 0; i < location.size(); i++){
+					if (i == 0)
+						sql = sql + "(location LIKE '" + location.get(i) + "%' ";
+					else 
+						sql = sql + " OR location LIKE '" + location.get(i) + "%' ";
+				}
+				sql = sql + ") AND ";
+			}
+			if (crop != null){
+				for (int i = 0; i < crop.size(); i++){
+					if (i == 0)
+						sql = sql + "(crop LIKE '" + crop.get(i) + "%' ";
+					else 
+						sql = sql + " OR crop LIKE '" + crop.get(i) + "%' ";
+				}
+				sql = sql + ") AND ";
+			}
+			if (annotation != null){
+				for (int i = 0; i < annotation.size(); i++){
+					if (i == 0)
+						sql = sql + "(annotation LIKE'" + annotation.get(i) + "%' ";
+					else
+						sql = sql + " OR annotation LIKE'" + annotation.get(i) + "%' ";
+				}
+				sql = sql + ") AND ";
+			}
+			sql = sql + "(dayofyear(date) BETWEEN "+beginDayOfYear+" AND "+endDayOfYear+") GROUP BY 1,2,3,4 order by 1 ASC, 2 ASC, 3 ASC, 4 DESC;";
 		} else {
 			// There is wrapping around the calendar year.
 			sql = "SELECT location, crop, annotation, IF(YEAR(DATE_ADD(date,INTERVAL "+ alertWindowLength +" DAY))>YEAR(date),YEAR(date)+1,year(date)), count(call_id) from KCCDATA WHERE ";
-			if (location != null)
-				sql = sql + "location LIKE '" + location + "%' AND ";
-			if (crop != null)
-				sql = sql + "crop LIKE '" + crop + "%' AND ";
-			if (annotation != null)
-				sql = sql + "annotation LIKE'" + annotation + "%' AND ";
+			if (location != null){
+				for (int i = 0; i < location.size(); i++){
+					if (i == 0)
+						sql = sql + "(location LIKE '" + location.get(i) + "%' ";
+					else 
+						sql = sql + " OR location LIKE '" + location.get(i) + "%' ";
+				}
+				sql = sql + ") AND ";
+			}
+			if (crop != null){
+				for (int i = 0; i < crop.size(); i++){
+					if (i == 0)
+						sql = sql + "(crop LIKE '" + crop.get(i) + "%' ";
+					else 
+						sql = sql + " OR crop LIKE '" + crop.get(i) + "%' ";
+				}
+				sql = sql + ") AND ";
+			}
+			if (annotation != null){
+				for (int i = 0; i < annotation.size(); i++){
+					if (i == 0)
+						sql = sql + "(annotation LIKE'" + annotation.get(i) + "%' ";
+					else
+						sql = sql + " OR annotation LIKE'" + annotation.get(i) + "%' ";
+				}
+				sql = sql + ") AND ";
+			}
 			
-			sql = sql + "dayofyear(date) <= "+beginDayOfYear+" OR dayofyear(date) >= "+ endDayOfYear+" GROUP BY 1, 2, 3, 4 order by 1 ASC, 2 ASC, 3 ASC, 4 DESC;";
+			sql = sql + "(dayofyear(date) <= "+beginDayOfYear+" OR dayofyear(date) >= "+ endDayOfYear+") GROUP BY 1, 2, 3, 4 order by 1 ASC, 2 ASC, 3 ASC, 4 DESC;";
 		}
-		System.out.println(sql);
 		Connection conn;
 		try {
 			conn = getConnection();

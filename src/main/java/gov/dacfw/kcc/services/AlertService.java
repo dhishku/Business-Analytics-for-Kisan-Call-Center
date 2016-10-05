@@ -18,45 +18,57 @@ public class AlertService {
 
 
 	public List<Alert> getAllAlerts(Calendar currentDate, int alertWindowLength) {
-		// Create a new List
-		List<Alert> allAlerts = new ArrayList<Alert>();
-		
-		// Then get all crop alerts and all location alerts
-		allAlerts.addAll(getAllCropAlerts(currentDate, alertWindowLength));
-		allAlerts.addAll(getAllLocationAlerts(currentDate, alertWindowLength));
-		allAlerts.addAll(getAllAnnotationAlerts(currentDate, alertWindowLength));
-	
-		return allAlerts;
-	}
-
-	public List<Alert> getAllCropAlerts(Calendar currentDate, int alertWindowLength) {
 		List<String> cropsList = kccService.getAllCrops();
+		List<String> locationsList = kccService.getAllLocations();
+		List<String> annotationsList = kccService.getAllAnnotations();
 		List<Alert> alertList = new ArrayList<Alert>();
-		
-		if (cropsList.isEmpty())
+		if ((cropsList.isEmpty()) || (locationsList.isEmpty()) || (annotationsList.isEmpty()))
 			return alertList;
 		
-		for (String crop : cropsList) {
-			List<Alert> singleCropAlert = getCropAlert(crop, currentDate, alertWindowLength);
-			if (!singleCropAlert.isEmpty())
-				// not null means alert is true.
-				alertList.addAll(singleCropAlert);
-		}
-		return alertList;
-	}
-
-	public List<Alert> getCropAlert(String crop, Calendar currentDate, int alertWindowLength) {
 		// First create the beginning and the end dates
 		int endDayOfYear = currentDate.get(Calendar.DAY_OF_YEAR);
 		currentDate.add(Calendar.DATE, -alertWindowLength);
 		int beginDayOfYear = currentDate.get(Calendar.DAY_OF_YEAR);
 		// Now get the calls summary for this crop.
-		List<CallSummaryData> callsSummaryThisCrop = kccService.getCallsSummary(null, crop, null, beginDayOfYear, endDayOfYear, alertWindowLength);
-		System.out.print("Crop: "+crop);
-		System.out.print(". Total target size: "+callsSummaryThisCrop.size());
-		/*for (int i = 0; i < callsSummaryThisCrop.size(); i++){
-			System.out.println("index: "+i+" "+callsSummaryThisCrop.get(i).toString());
-		}*/
+		List<CallSummaryData> callsSummaryTarget = kccService.getCallsSummary(locationsList, cropsList, annotationsList, beginDayOfYear, endDayOfYear, alertWindowLength);
+
+		// Also get year wise total calls made in this window.
+		List<CallSummaryData> callsSummaryTotal = kccService.getCallsSummary(null, null, null, beginDayOfYear, endDayOfYear, alertWindowLength);
+		
+		// Now return alerts from this data.
+		return getAlerts(callsSummaryTarget, callsSummaryTotal);
+	}
+
+	public List<Alert> getAllCropAlerts(Calendar currentDate, int alertWindowLength) {
+		List<String> cropsList = kccService.getAllCrops();
+		List<Alert> alertList = new ArrayList<Alert>();
+		if (cropsList.isEmpty())
+			return alertList;
+		
+		// First create the beginning and the end dates
+		int endDayOfYear = currentDate.get(Calendar.DAY_OF_YEAR);
+		currentDate.add(Calendar.DATE, -alertWindowLength);
+		int beginDayOfYear = currentDate.get(Calendar.DAY_OF_YEAR);
+		// Now get the calls summary for this crop.
+		List<CallSummaryData> callsSummaryTarget = kccService.getCallsSummary(null, cropsList, null, beginDayOfYear, endDayOfYear, alertWindowLength);
+
+		// Also get year wise total calls made in this window.
+		List<CallSummaryData> callsSummaryTotal = kccService.getCallsSummary(null, null, null, beginDayOfYear, endDayOfYear, alertWindowLength);
+		
+		// Now return alerts from this data.
+		return getAlerts(callsSummaryTarget, callsSummaryTotal);
+	}
+
+	public List<Alert> getCropAlert(String crop, Calendar currentDate, int alertWindowLength) {
+		List<String> crops = new ArrayList<String>();
+		crops.add(crop);
+		
+		// First create the beginning and the end dates
+		int endDayOfYear = currentDate.get(Calendar.DAY_OF_YEAR);
+		currentDate.add(Calendar.DATE, -alertWindowLength);
+		int beginDayOfYear = currentDate.get(Calendar.DAY_OF_YEAR);
+		// Now get the calls summary for this crop.
+		List<CallSummaryData> callsSummaryThisCrop = kccService.getCallsSummary(null, crops, null, beginDayOfYear, endDayOfYear, alertWindowLength);
 		
 		// Also get year wise total calls made in this window.
 		List<CallSummaryData> callsSummaryTotal = kccService.getCallsSummary(null, null, null, beginDayOfYear, endDayOfYear, alertWindowLength);
@@ -245,27 +257,32 @@ public class AlertService {
 		if (locationsList.isEmpty())
 			return alertList;
 		
-		for (String location : locationsList) {
-			List<Alert> currentLocationList = getLocationAlert(location, currentDate, alertWindowLength);
-			if (!currentLocationList.isEmpty())
-				// not null means alert is true.
-				alertList.addAll(currentLocationList);
-		}
-		return alertList;
+		// First create the beginning and the end dates
+		int endDayOfYear = currentDate.get(Calendar.DAY_OF_YEAR);
+		currentDate.add(Calendar.DATE, -alertWindowLength);
+		int beginDayOfYear = currentDate.get(Calendar.DAY_OF_YEAR);
+		// Now get the calls summary for this crop.
+		List<CallSummaryData> callsSummaryTarget = kccService.getCallsSummary(locationsList, null, null, beginDayOfYear, endDayOfYear, alertWindowLength);
+
+		// Also get year wise total calls made in this window.
+		List<CallSummaryData> callsSummaryTotal = kccService.getCallsSummary(null, null, null, beginDayOfYear, endDayOfYear, alertWindowLength);
+		
+		// Now return alerts from this data.
+		return getAlerts(callsSummaryTarget, callsSummaryTotal);
 	}
 
 	public List<Alert> getLocationAlert(String location, Calendar currentDate, int alertWindowLength) {
-		// First create the beginning and the end dates
+		List<String> locations = new ArrayList<String>();
+		locations.add(location);
 		
+		// First create the beginning and the end dates
 		int endDayOfYear = currentDate.get(Calendar.DAY_OF_YEAR);
 		
 		currentDate.add(Calendar.DATE, -alertWindowLength);
 		int beginDayOfYear = currentDate.get(Calendar.DAY_OF_YEAR);
 		
 		// Now get the calls summary for this crop.
-		List<CallSummaryData> callsSummaryThisLocation = kccService.getCallsSummary(location, null, null, beginDayOfYear, endDayOfYear, alertWindowLength);
-		System.out.print("Location: "+location);
-		System.out.print(". Total target size: "+callsSummaryThisLocation.size());
+		List<CallSummaryData> callsSummaryThisLocation = kccService.getCallsSummary(locations, null, null, beginDayOfYear, endDayOfYear, alertWindowLength);
 		
 		// Also get year wise total calls made in this window.
 		List<CallSummaryData> callsSummaryTotal = kccService.getCallsSummary(null, null, null, beginDayOfYear, endDayOfYear, alertWindowLength);
@@ -315,16 +332,25 @@ public class AlertService {
 		List<Alert> alertList = new ArrayList<Alert>();
 		if (annotationsList.isEmpty())
 			return alertList;
-		for (String annotation : annotationsList) {
-			List<Alert> currentAnnotationList = getAnnotationAlert(annotation, currentDate, alertWindowLength);
-			if (!currentAnnotationList.isEmpty())
-				// not null means alert is true.
-				alertList.addAll(currentAnnotationList);
-		}
-		return alertList;
+
+		// First create the beginning and the end dates
+		int endDayOfYear = currentDate.get(Calendar.DAY_OF_YEAR);
+		currentDate.add(Calendar.DATE, -alertWindowLength);
+		int beginDayOfYear = currentDate.get(Calendar.DAY_OF_YEAR);
+		// Now get the calls summary for this crop.
+		List<CallSummaryData> callsSummaryTarget = kccService.getCallsSummary(null, null, annotationsList, beginDayOfYear, endDayOfYear, alertWindowLength);
+
+		// Also get year wise total calls made in this window.
+		List<CallSummaryData> callsSummaryTotal = kccService.getCallsSummary(null, null, null, beginDayOfYear, endDayOfYear, alertWindowLength);
+		
+		// Now return alerts from this data.
+		return getAlerts(callsSummaryTarget, callsSummaryTotal);
 	}
 
 	public List<Alert> getAnnotationAlert(String annotation, Calendar currentDate, int alertWindowLength) {
+		List<String> annotations = new ArrayList<String>();
+		annotations.add(annotation);
+		
 		// First create the beginning and the end dates
 		int endDayOfYear = currentDate.get(Calendar.DAY_OF_YEAR);
 		
@@ -332,9 +358,7 @@ public class AlertService {
 		int beginDayOfYear = currentDate.get(Calendar.DAY_OF_YEAR);
 		
 		// Now get the calls summary for this crop.
-		List<CallSummaryData> callsSummaryThisAnnotation = kccService.getCallsSummary(null, null, annotation, beginDayOfYear, endDayOfYear, alertWindowLength);
-		System.out.print("Annotation: "+annotation);
-		System.out.print(". Total target size: "+callsSummaryThisAnnotation.size());
+		List<CallSummaryData> callsSummaryThisAnnotation = kccService.getCallsSummary(null, null, annotations, beginDayOfYear, endDayOfYear, alertWindowLength);
 
 		// Also get year wise total calls made in this window.
 		List<CallSummaryData> callsSummaryTotal = kccService.getCallsSummary(null, null, null, beginDayOfYear, endDayOfYear, alertWindowLength);
