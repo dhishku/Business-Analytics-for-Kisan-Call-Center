@@ -24,6 +24,11 @@ dependencies {
     // The production code uses the SLF4J logging API at compile time
     compile 'org.slf4j:slf4j-api:1.7.21'
     compile "mysql:mysql-connector-java:6.0.4"
+    
+    compile "org.apache.poi:poi:3.15"
+    compile "org.apache.poi:poi-ooxml:3.15"
+    compile "com.monitorjbl:xlsx-streamer:1.0.0"
+    
 	compile "javax.ws.rs:javax.ws.rs-api:2.0.1"
  	compile "org.glassfish.jersey.core:jersey-server:2.22.1"
  	compile "org.glassfish.jersey.containers:jersey-container-servlet:2.22.1"
