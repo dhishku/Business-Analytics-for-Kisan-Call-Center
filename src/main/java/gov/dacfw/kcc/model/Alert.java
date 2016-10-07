@@ -3,7 +3,7 @@ package gov.dacfw.kcc.model;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class Alert {
+public class Alert implements Comparable{
 	public static final double LAMBDA_DECAY = 0.80;
 	public static final double NORMAL_INTENSITY_CEILING = 1.2;
 	public static final double NORMAL_INTENSITY_FLOOR = 0.8;
@@ -67,6 +67,13 @@ public class Alert {
 
 	public void setAnnotation(String annotation) {
 		this.annotation = annotation;
+	}
+
+	@Override
+	public int compareTo(Object o) {
+		double targetIntensity = ((Alert)o).getIntensity();
+
+		return (int)((targetIntensity - this.getIntensity())*10000);
 	}
 
 }
