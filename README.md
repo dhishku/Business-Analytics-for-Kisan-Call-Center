@@ -10,6 +10,7 @@ These are just some of the use cases, the possibilities are infinite.
 ## Project Structure
 
 1. The project uses mysql data to store the database. The schema of the KCCDATA table in MYSQL testDB database is as given below.
+<<<<<<< HEAD
 ![mysql schema](res/mysql.png)
 +------------+--------------+------+-----+---------+----------------+
 | Field      | Type         | Null | Key | Default | Extra          |
@@ -49,5 +50,9 @@ These are just some of the use cases, the possibilities are infinite.
 	`http://localhost:8080/KCC/alerts/annotations/{annotation}?currentDate=YYYY-MM-DD&alertWindowLength=WW`
 	will return alerts for a particular annotation.
 	(iii) Presently an alert is generated in the following way. The proportion of calls for a particular {location, crop, annotation} combination to the total calls made this year in the alert window legth is calculated. Then for each previous year, the proportion of calls for the same commbination to the total calls made in that year is calculated. Then a weighted average of all these previous years proportions is calculated. If the current year's proportion is greater than a ceiling threshold or lower than  a floor threshold, then an alert is generated. The weights use a lambda decay - the more we go in past, the lesser the importance of data and hence the lower the weight.
+=======
+
+![sql schema](res/mysql.png)`
+>>>>>>> master
 
 3. To run the project, clone the repository, open in eclipse as a gradle project. Run the task "gradle eclipseWTP" to build the WAR file. Then Run as --> 1. Run on Server... Select the Tomcat v7 server. Then enter the desired URIs in your browser window and get alerts.
